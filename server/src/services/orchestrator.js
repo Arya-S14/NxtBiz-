@@ -53,10 +53,14 @@ export async function orchestrateEmail({ emailId, userId, app }) {
       await createNotification({ userId, type: 'invoice_created', title: 'Invoice created', message: `Invoice ${invoice.id} created for follow-up.`, metadata: { entityType: 'invoice', invoiceId: invoice.id, emailId: email.id }, app });
       return invoice;
     }
-    if (agentId === 'customer-support-agent' && resolvedCustomerId) return Ticket.create({ customerId: resolvedCustomerId, priority: email.urgency, issue: email.subject, status: 'open' });
+    if (agentId === 'customer-support-agent' && resolvedCustomerId) {
+      const ticket = await Ticket.create({ customerId: resolvedCustomerId, priority: email.urgency, issue: email.subject, status: 'open' });
+      await createNotification({ userId, type: 'new_ticket', title: 'Support ticket created', message: ticket.issue, metadata: { entityType: 'ticket', ticketId: ticket.id, emailId: email.id }, app });
+      return ticket;
+    }
     if (agentId === 'crm-agent' && resolvedCustomerId) return CRMActivity.create({ customerId: resolvedCustomerId, type: 'email', title: email.subject, body: email.body, metadata: { sentiment: email.sentiment, intent: email.intent, urgency: email.urgency }, createdBy: userId });
     if (agentId === 'chief-of-staff-agent') return Memory.create({ scope: 'email', customerId: resolvedCustomerId, agentId, key: `email:${email.id}`, value: `${email.intent}: ${email.subject}`, tags: [email.intent, email.urgency], source: 'agent-orchestration' });
     return { action: agentId, status: 'recorded' };
   }); }
-  email.processed = true; await email.save(); await createNotification({ userId, type: 'agent_completed', title: 'Email orchestration completed', message: `Agents completed follow-up for “${email.subject}”.`, metadata: { entityType: 'email', emailId: email.id, eventId }, app }); app?.get('io')?.emit('agent_completed', { emailId: email.id, eventId }); return { eventId, analysis, plan };
+  email.processed = true; await email.save(); await createNotification({ userId, type: 'agent_completed', title: 'Email orchestration completed', message: `Agents completed follow-up for "${email.subject}".`, metadata: { entityType: 'email', emailId: email.id, eventId }, app }); return { eventId, analysis, plan };
 }
