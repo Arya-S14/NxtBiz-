@@ -1,0 +1,11 @@
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import { useAuthStore } from '../features/auth/auth.store.js';
+
+export default function AuthPage({ mode }) {
+  const navigate = useNavigate(); const authenticate = useAuthStore((state) => state.authenticate); const register = mode === 'register';
+  const [values, setValues] = useState({ name: '', email: '', password: '' }); const [submitting, setSubmitting] = useState(false);
+  async function submit(event) { event.preventDefault(); setSubmitting(true); try { await authenticate(mode, values); toast.success(`Welcome to NxtBiz${register ? '' : ' again'}.`); navigate('/'); } catch (error) { toast.error(error.response?.data?.message || 'Unable to authenticate.'); } finally { setSubmitting(false); } }
+  return <main className="grid min-h-screen place-items-center bg-slate-950 p-6"><form onSubmit={submit} className="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl"><h1 className="text-3xl font-bold text-slate-900">NxtBiz</h1><h2 className="mt-2 text-xl font-semibold">{register ? 'Create your account' : 'Sign in to operations'}</h2>{register && <label className="mt-6 block text-sm font-medium">Name<input required minLength="2" className="mt-1 w-full rounded border p-2" value={values.name} onChange={(e) => setValues({ ...values, name: e.target.value })} /></label>}<label className="mt-4 block text-sm font-medium">Email<input required type="email" className="mt-1 w-full rounded border p-2" value={values.email} onChange={(e) => setValues({ ...values, email: e.target.value })} /></label><label className="mt-4 block text-sm font-medium">Password<input required type="password" minLength="8" className="mt-1 w-full rounded border p-2" value={values.password} onChange={(e) => setValues({ ...values, password: e.target.value })} /></label><button disabled={submitting} className="mt-6 w-full rounded bg-blue-600 px-4 py-2 font-medium text-white disabled:opacity-50">{submitting ? 'Please wait…' : register ? 'Create account' : 'Sign in'}</button><p className="mt-5 text-sm text-slate-600">{register ? 'Already have an account?' : 'Need an account?'} <Link className="text-blue-700" to={register ? '/login' : '/register'}>{register ? 'Sign in' : 'Register'}</Link></p></form></main>;
+}

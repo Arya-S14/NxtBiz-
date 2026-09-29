@@ -1,0 +1,28 @@
+{
+  "name": "nxtbiz-server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "build": "node --check src/server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "bullmq": "^5.34.10",
+    "compression": "^1.7.4",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "helmet": "^8.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "ioredis": "^5.4.2",
+    "mongoose": "^8.9.0",
+    "morgan": "^1.10.0",
+    "pdfkit": "^0.16.0",
+    "socket.io": "^4.8.1",
+    "zod": "^3.24.1"
+  }
+}

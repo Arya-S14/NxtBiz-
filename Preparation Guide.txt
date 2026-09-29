@@ -1,0 +1,11 @@
+1) Project at least 2 with entire structure architecuture question and cross questions learned 
+2) System Design, Object Oriented Design
+3) Machine Learning 
+4) Deep learning -- all architectures 
+5) LLM --all questions and cross questions 
+6) Artificial Intelligence 
+7) AI Agents 
+8) Agentic AI 
+10) JavaScript
+11) Nodejs and Express Js 
+12) React

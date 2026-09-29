@@ -1,0 +1,3 @@
+import mongoose from 'mongoose';
+const executionSchema = new mongoose.Schema({ agentId: { type: String, required: true, index: true }, eventId: { type: String, required: true, index: true }, status: { type: String, enum: ['started', 'completed', 'failed'], default: 'started' }, input: { type: mongoose.Schema.Types.Mixed, default: {} }, output: { type: mongoose.Schema.Types.Mixed, default: {} }, logs: [{ type: String }], startedAt: { type: Date, default: Date.now }, finishedAt: Date, error: String }, { timestamps: true });
+export const AgentExecution = mongoose.model('AgentExecution', executionSchema);

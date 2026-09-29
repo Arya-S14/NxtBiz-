@@ -1,0 +1,11 @@
+const negativeWords = ['angry', 'cancel', 'broken', 'refund', 'late', 'complaint', 'urgent', 'bad', 'issue', 'failed'];
+const positiveWords = ['thanks', 'great', 'love', 'happy', 'excellent', 'appreciate', 'renew'];
+const intentRules = [{ intent: 'schedule_meeting', words: ['meeting', 'schedule', 'calendar', 'call', 'discuss'] }, { intent: 'invoice_request', words: ['invoice', 'bill', 'payment', 'receipt', 'invoice request', 'invoice needed', 'send my invoice', 'send the invoice'] }, { intent: 'support_request', words: ['support', 'broken', 'issue', 'failed', 'help', 'refund'] }, { intent: 'sales_opportunity', words: ['pricing', 'quote', 'demo', 'proposal', 'buy', 'renew'] }];
+
+export function analyzeEmail({ subject, body }) {
+  const text = `${subject} ${body}`.toLowerCase(); const negatives = negativeWords.filter((word) => text.includes(word)); const positives = positiveWords.filter((word) => text.includes(word)); const match = intentRules.find((rule) => rule.words.some((word) => text.includes(word))); const critical = ['urgent', 'asap', 'immediately'].some((word) => text.includes(word));
+  const sentiment = negatives.length > positives.length ? 'negative' : positives.length > negatives.length ? 'positive' : 'neutral'; const intent = match?.intent || 'general_inquiry'; const urgency = critical ? 'critical' : negatives.length ? 'high' : match ? 'medium' : 'low';
+  const autoResponse = intent === 'support_request' ? 'We have received your support request and will follow up shortly.' : intent === 'schedule_meeting' ? 'Thank you. Our team will coordinate a suitable meeting time.' : intent === 'invoice_request' ? 'We have received your invoice request and will send the details shortly.' : 'Thank you for contacting NxtBiz. Our operations team will follow up.';
+  const recommendations = [urgency === 'critical' ? 'Escalate to an operations manager immediately.' : null, intent === 'support_request' ? 'Create and assign a support ticket.' : null, intent === 'schedule_meeting' ? 'Propose meeting times and record the outcome in CRM.' : null, intent === 'invoice_request' ? 'Prepare the requested invoice details.' : null, 'Record this interaction in the customer CRM timeline.'].filter(Boolean);
+  return { sentiment, intent, urgency, confidence: match ? 0.88 : 0.62, autoResponse, recommendations };
+}

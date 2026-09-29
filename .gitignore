@@ -1,0 +1,5 @@
+node_modules/
+dist/
+.env
+nxtBiz_credentials.txt
+server/storage/pdfs/*.pdf

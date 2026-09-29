@@ -1,0 +1,14 @@
+import { Router } from 'express';
+import { z } from 'zod';
+import { Workflow } from '../../models/Workflow.js';
+import { requireAuth, allowRoles } from '../../middleware/auth.js';
+import { validate } from '../../middleware/validate.js';
+import { executeWorkflow } from '../../services/workflowExecutor.js';
+const router = Router(); const step = z.object({ type: z.enum(['trigger', 'condition', 'action']), value: z.string().min(1) }); const input = z.object({ name: z.string().trim().min(2), trigger: z.string().trim().min(1), condition: z.string().optional(), action: z.string().trim().min(1), steps: z.array(step).default([]), enabled: z.boolean().optional() }); router.use(requireAuth);
+router.get('/', async (_req, res, next) => { try { res.json({ workflows: await Workflow.find().sort({ updatedAt: -1 }) }); } catch (error) { next(error); } });
+router.post('/', allowRoles('Admin', 'Manager'), validate(input), async (req, res, next) => { try { res.status(201).json({ workflow: await Workflow.create(req.body) }); } catch (error) { next(error); } });
+router.get('/:id', async (req, res, next) => { try { const workflow = await Workflow.findById(req.params.id); if (!workflow) return res.status(404).json({ message: 'Workflow not found.' }); res.json({ workflow }); } catch (error) { next(error); } });
+router.put('/:id', allowRoles('Admin', 'Manager'), validate(input.partial()), async (req, res, next) => { try { const workflow = await Workflow.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true }); if (!workflow) return res.status(404).json({ message: 'Workflow not found.' }); res.json({ workflow }); } catch (error) { next(error); } });
+router.delete('/:id', allowRoles('Admin', 'Manager'), async (req, res, next) => { try { const workflow = await Workflow.findByIdAndDelete(req.params.id); if (!workflow) return res.status(404).json({ message: 'Workflow not found.' }); res.status(204).end(); } catch (error) { next(error); } });
+router.post('/:id/execute', allowRoles('Admin', 'Manager'), validate(z.object({ payload: z.record(z.unknown()).default({}) })), async (req, res, next) => { try { res.json(await executeWorkflow({ workflowId: req.params.id, payload: req.body.payload, userId: req.user.id, app: req.app })); } catch (error) { if (error.message === 'Workflow not found.') return res.status(404).json({ message: error.message }); next(error); } });
+export default router;
